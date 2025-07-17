@@ -4,7 +4,7 @@ return {
 	-- follow latest release.
 	version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
  	dependencies = { "rafamadriz/friendly-snippets" },
-	build = "make install_jsregexp",
+	build = "make install_jsregexp CC=gcc",
 	config = function()
 		local ls = require("luasnip")
 		local s = ls.snippet

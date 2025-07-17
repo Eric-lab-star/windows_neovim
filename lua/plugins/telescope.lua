@@ -156,6 +156,5 @@ return {
 		keys.set("n", "<leader>lg", builtin.live_grep, { noremap = true })
 		keys.set("n", "<leader>nn", "<cmd>Telescope luasnip<cr>")
 		keys.set("n", "<leader>pp", "<cmd>Telescope projects<cr>")
-		keys.set("n", "<leader>pp", "<cmd>Telescope projects<cr>")
 	end,
 }
