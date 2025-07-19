@@ -34,7 +34,7 @@ return {
 						desc = 'Projects',
 						key = 'a',
 						key_format = ' [%s]',
-						action = 'Telescope projects',
+						action = 'Telescope project',
 					},
 					{
 						icon = '  ',

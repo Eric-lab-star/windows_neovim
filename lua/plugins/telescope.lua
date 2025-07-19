@@ -5,6 +5,7 @@ return {
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		"benfowler/telescope-luasnip.nvim",
+		"nvim-telescope/telescope-project.nvim",
 	},
 
 	config = function()
@@ -138,10 +139,17 @@ return {
 					},
 				},
 			},
+			extensions = {
+				project = {
+					base_dirs = {
+						'~/Documents/doodle/',
+					},
+				},
+			}
 		})
 
 		require("telescope").load_extension("luasnip")
-		require("telescope").load_extension("projects")
+		require("telescope").load_extension("project")
 
 		local keys = vim.keymap
 		keys.set("n", "<leader>ff", builtin.find_files, {})
@@ -155,6 +163,6 @@ return {
 		keys.set("n", "<leader>wd", builtin.diagnostics, { noremap = true })
 		keys.set("n", "<leader>lg", builtin.live_grep, { noremap = true })
 		keys.set("n", "<leader>nn", "<cmd>Telescope luasnip<cr>")
-		keys.set("n", "<leader>pp", "<cmd>Telescope projects<cr>")
+		-- keys.set("n", "<leader>pp", "<cmd>Telescope projects<cr>")
 	end,
 }

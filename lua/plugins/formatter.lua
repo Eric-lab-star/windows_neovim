@@ -4,7 +4,6 @@ return {
 	config = function()
 		require("formatter").setup {
 		logging = true,
-		log_level = warn,
 		filetype = {
 			lua = {
 				require("formatter.filetypes.lua").stylua,
