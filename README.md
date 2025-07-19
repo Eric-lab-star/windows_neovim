@@ -2,5 +2,6 @@
 
 
 nvim directory location
-    C:\Users\\<user_name>\\AppData\Local\nvim
+
+C:\Users\\<user_name>\\AppData\Local\nvim
 
