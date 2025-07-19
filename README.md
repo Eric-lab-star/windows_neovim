@@ -1,7 +1,6 @@
 # neovim setup guide
 
 
-nvim directory location
-
-C:\Users\\<user_name>\\AppData\Local\nvim
+- nvim directory location
+    - Path: C:\Users\\<user_name>\\AppData\Local\nvim
 
