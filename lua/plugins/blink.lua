@@ -13,7 +13,7 @@ return {
   ---@type blink.cmp.Config
   opts = {
     keymap = {
-			preset = 'default',
+			preset = 'none',
 			['<C-d>'] = { 'show', 'show_documentation', 'hide_documentation' },
 			['<C-e>'] = { 'hide', 'fallback' },
 			['<CR>'] = { 'accept', 'fallback' },
@@ -31,6 +31,7 @@ return {
     appearance = {
       nerd_font_variant = 'mono'
     },
+
     completion = {
 			ghost_text = {
 				enabled = true
@@ -47,11 +48,12 @@ return {
 			trigger = {
 				show_on_keyword = true,
 			},
-			documentation = { auto_show = false }
+			documentation = { auto_show = true }
 		},
 		snippets = {
 			preset = 'luasnip'
 		},
+
     sources = {
       default = {'snippets', 'lazydev', 'lsp', 'path', 'buffer', 'obsidian', 'obsidian_new', 'obsidian_tags' },
 			providers = {

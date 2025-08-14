@@ -23,10 +23,9 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- conceallevel = 2
 vim.opt.cole = 2
-
-vim.opt.cmdheight = 1
-
+vim.opt.cmdheight = 0
 
 -- Make sure to setup `mapleader` and `maplocalleader` before
 -- loading lazy.nvim so that mappings are correct.
