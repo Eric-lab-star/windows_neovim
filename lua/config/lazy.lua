@@ -121,6 +121,10 @@ key.set("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opt)
 key.set("n", "<C-k>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", opt)
 key.set("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opt)
 
+vim.api.nvim_create_autocmd('FileType', {
+	pattern= "*",
+  callback = function() pcall(vim.treesitter.start) end,
+})
 
 -- Setup lazy.nvim
 require("lazy").setup({
