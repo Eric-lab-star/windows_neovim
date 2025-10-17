@@ -33,6 +33,11 @@ return {
     },
 
     completion = {
+			menu = {
+				draw = {
+					treesitter = {'lsp'},
+				},
+			},
 			ghost_text = {
 				enabled = true
 			},

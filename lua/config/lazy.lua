@@ -67,6 +67,41 @@ vim.opt.pumheight = 10
 
 vim.cmd("autocmd TermOpen * startinsert")
 
+
+
+-- A helper for shorter mapping
+local map = vim.keymap.set
+
+vim.opt.langmap = {
+  -- Movement
+  "ㅗh", "ㅓj", "ㅏk", "ㅣl",
+
+  -- Editing
+  "ㅇd", "ㅛy", "ㅔp", "ㅐo", "ㅌx", "ㅕu",
+
+  -- Visual mode
+  "ㅂv",
+
+  -- Search
+  "ㅡ/",
+
+  -- Uppercase variants
+  "ㅇD", "ㅛY", "ㅔP", "ㅐO", "ㅌX", "ㅕU", "ㅂV", "ㅡ?"
+}
+
+
+
+-- Save
+vim.cmd.cnoreabbrev('ㅈ w')
+-- Quit
+vim.cmd.cnoreabbrev('ㅂ q')
+-- Save & Quit
+vim.cmd.cnoreabbrev('ㅈㅂ wq')
+-- Force Quit
+vim.cmd.cnoreabbrev('ㅃ q!')
+-- Write All
+vim.cmd.cnoreabbrev('ㅈㅈ wa')
+
 vim.keymap.set(
 	't',
 	'<Esc>',
@@ -119,9 +154,42 @@ key.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opt)
 key.set("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opt)
 key.set("n", "<C-k>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", opt)
 key.set("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opt)
+vim.keymap.set(
+	"n",
+	"<C-Up>",
+	":resize +2<cr>",
+	opt
+)
 
+vim.keymap.set(
+	"n",
+	"<C-Down>",
+	":resize -2<cr>",
+	opt
+)
+
+vim.keymap.set(
+	"n",
+	"<C-Left>",
+	":vertical resize -2<cr>",
+	opt
+)
+
+vim.keymap.set(
+	"n",
+	"<C-Right>",
+	":vertical resize +2<cr>",
+	opt
+)
+
+
+-- tree-sitter
+vim.api.nvim_create_autocmd('FileType', {
+  callback = function() pcall(vim.treesitter.start) end,
+})
 
 -- Setup lazy.nvim
+--
 require("lazy").setup({
   spec = {
     -- import your plugins

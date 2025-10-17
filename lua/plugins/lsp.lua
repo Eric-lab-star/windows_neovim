@@ -39,18 +39,20 @@ return {
 		 }
 		}
   }
+
 	vim.lsp.config('arduino_language_server', {
 		cmd = {"arduino-language-server", "-cli-config" , "C:/Users/cyon2/AppData/Local/Arduino15/arduino-cli.yaml"},
 		filetypes = {"arduino"},
 		root_markers = {".yaml"},
 		settings = {
-			clangd = {"C:/Users/cyon2/clang+llvm-18.1.8-x86_64-pc-windows-msvc/bin/clangd.exe"},
+			clangd = {"C:/Users/cyon2/clang+llvm-20.1.0-x86_64-pc-windows-msvc/bin/clangd.exe"},
 			cli = {"C:/Users/cyon2/arduino_cli/bin"},
 			fqbn = {
 				"arduino:avr:uno"
 			}
 		},
 	})
+
 	vim.lsp.enable({
 			'lua_ls',
 			'ts_ls',
@@ -58,7 +60,8 @@ return {
 			'jdtls',
 			'pyright',
 			'arduino_language_server',
-			'clangd'
+			'clangd',
+			'cmake',
 		})
 	end,
 }

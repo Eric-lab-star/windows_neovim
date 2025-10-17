@@ -31,6 +31,9 @@ return {
 			},
 			java = {
 				require("formatter.filetypes.java").google_java_format
+			},
+			cpp = {
+				require("formatter.filetypes.cpp").clangformat
 			}
 		}
 	}

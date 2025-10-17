@@ -27,6 +27,8 @@ return {
 			hidden= true,
 		})
 
+		-- mapped to F2
+		-- compile aruduino
 		local compiler = function ()
 			if vim.bo.filetype == "arduino" then
 				if miniTerm:is_open() == true then
@@ -35,12 +37,18 @@ return {
 					miniTerm:toggle()
 					miniTerm:send("arduino-cli compile ".. "." , true)
 				end
-			else
-				print(dirname)
+			elseif vim.bo.filetype == "cpp" then
+				if miniTerm:is_open() == false then
+					miniTerm:toggle()
+				else
+					miniTerm:send("ninja -C build" , true)
+				end
 			end
 		end
 
-		local upload = function ()
+		-- mapped to F3 
+		-- upload to arduino
+		local runner = function ()
 			if vim.bo.filetype == "arduino" then
 				if miniTerm:is_open() == true then
 					miniTerm:send("arduino-cli upload ".. "." , true)
@@ -48,25 +56,26 @@ return {
 					miniTerm:toggle()
 					miniTerm:send("arduino-cli upload ".. "." , true)
 				end
-			else
-				print(dirname)
+			elseif vim.bo.filetype == "cpp" then
+				print("not implemented yet")
 			end
 		end
 
 		local serialPort = function ()
 			if vim.bo.filetype == "arduino" then
 				if miniTerm:is_open() == true then
-					miniTerm:send("arduino-cli monitor -p COM3 -c baudrate=9600".. "." , true)
+					miniTerm:send("arduino-cli monitor -c baudrate=9600".. "." , true)
 				else
 					miniTerm:toggle()
-					miniTerm:send("arduino-cli monitor -p COM3 -c baudrate=9600".. "." , true)
+					miniTerm:send("arduino-cli monitor -c baudrate=9600".. "." , true)
 				end
 			else
 				print(dirname)
 			end
 		end
+
 		vim.keymap.set(
-			{"n"},
+			{"n", "t"},
 			"<C-s>",
 			function ()
 				miniTerm:toggle()
@@ -84,7 +93,7 @@ return {
 		vim.keymap.set(
 			"n",
 			"<F3>",
-			upload,
+			runner,
 			{noremap = true}
 		)
 
