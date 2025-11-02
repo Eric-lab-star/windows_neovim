@@ -1,5 +1,3 @@
--- Bootstrap lazy.nvim
--- 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -113,32 +111,43 @@ vim.keymap.set(
 vim.keymap.set(
 	"n",
 	"<C-h>",
-	"<cmd>bp<cr>"
+	"<cmd>BufferPrevious<cr>"
 )
 
 vim.keymap.set(
 	"n",
 	"<c-l>",
-	"<cmd>bn<cr>"
+	"<cmd>BufferNext<cr>"
 )
 
 vim.keymap.set(
 	"n",
 	"<leader>dd",
-	"<cmd>bd<cr>"
+	"<cmd>BufferClose<cr>"
 )
 
 vim.keymap.set(
 	"n",
-	"<m-1>",
-	"<cmd>%bd|e#|bd#<cr>"
+	"<A-,>",
+	"<cmd>BufferMovePrevious<cr>"
+)
+
+vim.keymap.set(
+	"n",
+	"<A-.>",
+	"<cmd>BufferMoveNext<cr>"
 )
 
 vim.keymap.set(
 	"n",
 	"-",
 	"<CMD>Oil<CR>"
+)
 
+vim.keymap.set(
+	"n",
+	"<C-g>g",
+	"<CMD>NvimTreeFindFile<CR>"
 )
 
 --- lsp configs 
@@ -154,6 +163,7 @@ key.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opt)
 key.set("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opt)
 key.set("n", "<C-k>", "<cmd>lua vim.lsp.buf.signature_help()<CR>", opt)
 key.set("n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<CR>", opt)
+
 vim.keymap.set(
 	"n",
 	"<C-Up>",
