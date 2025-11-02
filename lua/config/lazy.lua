@@ -35,6 +35,8 @@ vim.diagnostic.config({
 	virtual_text = false,
 })
 
+vim.o.winborder='single'
+
 vim.opt.shadafile = "NONE"
 vim.opt.ignorecase=true
 
