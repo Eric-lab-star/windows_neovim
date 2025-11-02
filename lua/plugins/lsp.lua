@@ -83,6 +83,7 @@ return {
 	})
 
 	vim.lsp.enable({
+		'tailwindCSS',
 			'lua_ls',
 			'ts_ls',
 			'jdtls',
