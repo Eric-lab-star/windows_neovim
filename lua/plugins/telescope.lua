@@ -4,7 +4,6 @@ return {
 
 	dependencies = {
 		"nvim-lua/plenary.nvim",
-		"benfowler/telescope-luasnip.nvim",
 		"nvim-telescope/telescope-project.nvim",
 		{"nvim-treesitter/nvim-treesitter", branch = "main"}
 	},
@@ -40,7 +39,6 @@ return {
 			}
 		})
 
-		require("telescope").load_extension("luasnip")
 		require("telescope").load_extension("project")
 
 			local keys = vim.keymap
@@ -55,7 +53,6 @@ return {
 		keys.set("n", "<leader>ic", builtin.lsp_incoming_calls, { noremap = true })
 		keys.set("n", "<leader>wd", builtin.diagnostics, { noremap = true })
 		keys.set("n", "<leader>lg", builtin.live_grep, { noremap = true })
-		keys.set("n", "<leader>nn", "<cmd>Telescope luasnip<cr>")
 		keys.set("n", "<leader>pp", "<cmd>Telescope project<cr>")
 	end,
 }
