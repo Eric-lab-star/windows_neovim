@@ -4,7 +4,6 @@ return {
 		'rafamadriz/friendly-snippets',
 		'folke/lazydev.nvim',
 		'L3MON4D3/LuaSnip',
-		{'saghen/blink.compat', lazy = true, version = false}
 	},
 
   version = '1.*',
@@ -27,6 +26,11 @@ return {
 			['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
 
 			['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
+
+			-- Snippet jumps live here rather than in LuaSnip's own keymaps,
+			-- which used to collide with <C-k> above.
+			['<C-l>'] = { 'snippet_forward', 'fallback' },
+			['<C-h>'] = { 'snippet_backward', 'fallback' },
 		},
     appearance = {
       nerd_font_variant = 'mono'
@@ -60,18 +64,15 @@ return {
 		},
 
     sources = {
-      default = {'snippets', 'lazydev', 'lsp', 'path', 'buffer', 'obsidian', 'obsidian_new', 'obsidian_tags' },
+      -- obsidian.nvim now serves completions over an in-process LSP, so it
+      -- arrives via the 'lsp' source; the old blink.compat shims are gone.
+      default = {'snippets', 'lazydev', 'lsp', 'path', 'buffer' },
 			providers = {
 				lazydev = {
 					name = "LazyDev",
 					module = "lazydev.integrations.blink",
 					score_offset = 100,
 				},
-				obsidian = { name = "obsidian", module = "blink.compat.source" },
-				obsidian_new = { name = "obsidian_new", module = "blink.compat.source" },
-				obsidian_tags = { name = "obsidian_tags", module = "blink.compat.source" },
-
-
 			}
 		},
 

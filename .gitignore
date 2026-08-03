@@ -3,3 +3,7 @@ vscode-gradle
 shada
 /after/plugin/dbuiconfig.vim
 Lombok.jar
+
+# Vendored Eclipse JDT language server: ~220 files of jars and generated
+# OSGi state. Keep it on disk, out of the repo.
+/jdtls/

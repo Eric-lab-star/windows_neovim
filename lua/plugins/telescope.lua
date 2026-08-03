@@ -15,9 +15,7 @@ return {
 
 
 		telescope.setup({
-			defaults = {
-				find_command = { "fd", "--type", "f", "--hidden", "--follow" },
-			},
+			defaults = {},
 			pickers = {
 				buffers = {
 					mappings = {
@@ -26,7 +24,10 @@ return {
 						},
 					},
 				},
+				-- find_command is a find_files option; under `defaults` it was
+				-- silently ignored and telescope fell back to its own finder.
 				find_files = {
+					find_command = { "fd", "--type", "f", "--hidden", "--follow", "--exclude", ".git" },
 				},
 				oldfiles = {},
 				live_grep = {},

@@ -1,7 +1,10 @@
 return  {
 	'romgrk/barbar.nvim',
     dependencies = {
-      'lewis6991/gitsigns.nvim', -- OPTIONAL: for git status
+      -- Needs opts so lazy.nvim actually calls setup(); as a bare string it was
+      -- loaded but never initialised, so neither gitsigns nor barbar's git
+      -- status showed anything.
+      { 'lewis6991/gitsigns.nvim', opts = {} },
       'nvim-tree/nvim-web-devicons', -- OPTIONAL: for file icons
     },
     init = function() vim.g.barbar_auto_setup = false end,

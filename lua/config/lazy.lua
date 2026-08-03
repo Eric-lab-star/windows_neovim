@@ -37,14 +37,13 @@ vim.diagnostic.config({
 
 vim.o.winborder='single'
 
-vim.opt.shadafile = "NONE"
 vim.opt.ignorecase=true
 
 vim.opt.termguicolors=true
 vim.opt.guicursor = "n-v-c:block-Cursor/lCursor,i-ci-ve:ver25,r-cr-o:hor20"
 
 vim.opt.incsearch=true
-vim.lsp.set_log_level("warn")
+vim.lsp.log.set_level(vim.log.levels.WARN)
 
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1

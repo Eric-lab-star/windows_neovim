@@ -34,8 +34,11 @@ return {
 		local ms = ls.multi_snippet
 		local k = require("luasnip.nodes.key_indexer").new_key
 
+		-- Must be a list (or comma-joined with no spaces): the string
+		-- "TextChanged, TextChangedI" registered an autocmd for the literal
+		-- event " TextChangedI", so dynamic nodes never updated while typing.
 		ls.setup({
-			update_events = "TextChanged, TextChangedI"
+			update_events = { "TextChanged", "TextChangedI" }
 		})
 
 		ls.add_snippets("lua", {
@@ -80,15 +83,8 @@ return {
 
 		require("luasnip.loaders.from_vscode").lazy_load()
 
-		vim.keymap.set({ "i", "s" }, "<C-k>", function()
-			if ls.expand_or_jumpable() then
-				ls.expand_or_jump()
-			end
-		end, { silent = true })
-
-		vim.keymap.set({ "i", "s" }, "<C-j>", function()
-			ls.jump(-1)
-		end, { silent = true })
+		-- Snippet jumping is bound in blink.cmp (<C-l> / <C-h>); binding it
+		-- here too made <C-k> ambiguous with blink's signature-help mapping.
 
 		vim.keymap.set(
 			{"n"},

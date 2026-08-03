@@ -1,10 +1,7 @@
 ---
--- enable table mode byt :TableModeToggle or <leader>tm 
+-- enable table mode by :TableModeToggle or <leader>tm
 --
 return {
 	'dhruvasagar/vim-table-mode',
-	opts = {},
-	config=function ()
-		
-	end,
+	cmd = { 'TableModeToggle', 'TableModeEnable', 'Tableize' },
 }
