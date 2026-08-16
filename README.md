@@ -4,5 +4,3 @@
 - nvim directory location
     - Path: C:\Users\\<user_name>\\AppData\Local\nvim
 
-- Header padding 5
-

@@ -24,7 +24,9 @@ return {
 			end,
 			terminal_mappings= true,
 			hide_numbers = false,
-			shell = "pwsh -NoLogo",
+			-- 윈도우에서만 pwsh 를 강제한다. 맥/리눅스에서는 'vim.o.shell' 기본값
+			-- (로그인 셸) 이 맞으므로 건드리지 않는다.
+			shell = vim.fn.has("win32") == 1 and "pwsh -NoLogo" or vim.o.shell,
 		})
 
 

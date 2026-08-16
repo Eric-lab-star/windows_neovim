@@ -1,4 +1,4 @@
 return {
-	'https://github.com/godlygeek/tabular',
+	url = 'https://github.com/godlygeek/tabular',
 	cmd = { 'Tabularize', 'AddTabularPattern', 'AddTabularPipeline' },
 }

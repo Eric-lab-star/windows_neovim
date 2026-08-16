@@ -1,3 +1,16 @@
+-- telescope-project 의 base_dirs. ~ 로 시작하는 상대 경로라 맥/윈도우 양쪽에서
+-- 홈 기준으로 풀리지만, 없는 디렉터리를 넘기면 project 확장이 빈 목록으로
+-- 헤매므로 실제로 존재하는 것만 넣는다(맥에만 있는 경로가 섞여 있다).
+local function project_base_dirs()
+	local dirs = {}
+	for _, dir in ipairs({ "~/Programming" }) do
+		if vim.uv.fs_stat(vim.fn.expand(dir)) then
+			table.insert(dirs, dir)
+		end
+	end
+	return dirs
+end
+
 return {
 	"nvim-telescope/telescope.nvim",
 	branch = "master",
@@ -67,8 +80,7 @@ return {
 			},
 			extensions = {
 				project = {
-					base_dirs = {
-					},
+					base_dirs = project_base_dirs(),
 				},
 			}
 		})

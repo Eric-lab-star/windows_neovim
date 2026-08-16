@@ -9,6 +9,20 @@
 -- 두 번, 그것도 한 번은 잘못된 내용으로 반응했다.
 --
 -- conform 은 BufWritePre 에서 동기로 돌아서 쓰기가 한 번이다.
+
+-- clang-format 은 PATH 에 없는 경우가 많다. 윈도우에서는 clangd 와 같은 LLVM
+-- 릴리즈 안에, 맥에서는 CommandLineTools 안에만 풀려 있다. PATH 에 있으면
+-- 그걸 쓰고(brew install clang-format 등), 없으면 OS 별 전체 경로로 떨어진다.
+local function clang_format_cmd()
+	if vim.fn.executable("clang-format") == 1 then
+		return "clang-format"
+	end
+	if vim.fn.has("mac") == 1 then
+		return "/Library/Developer/CommandLineTools/usr/bin/clang-format"
+	end
+	return "C:/Users/cyon2/clang+llvm-20.1.0-x86_64-pc-windows-msvc/bin/clang-format.exe"
+end
+
 return {
 	"stevearc/conform.nvim",
 	event = { "BufWritePre" },
@@ -36,16 +50,18 @@ return {
 			typescriptreact = { "prettier" },
 			rust = { "rustfmt" },
 			java = { "google-java-format" },
+			c = { "clang_format" },
 			cpp = { "clang_format" },
 			-- 순서 중요: import 정렬 후 포맷.
 			python = { "ruff_organize_imports", "ruff_format" },
+			-- 예전 formatter.nvim 설정의 ["*"] = remove_trailing_whitespace 를 옮긴 것.
+			-- conform 의 "*" 는 다른 포매터에 '더해서' 모든 filetype 에 돈다.
+			["*"] = { "trim_whitespace" },
 		},
 
 		formatters = {
-			-- clang-format 은 PATH 에 없다. clangd 와 같은 LLVM 릴리즈 안에 풀려
-			-- 있을 뿐이라 lsp.lua 의 CLANGD 와 같은 방식으로 전체 경로를 준다.
 			clang_format = {
-				command = "C:/Users/cyon2/clang+llvm-20.1.0-x86_64-pc-windows-msvc/bin/clang-format.exe",
+				command = clang_format_cmd(),
 			},
 		},
 

@@ -1,6 +1,53 @@
+-- arduino-cli.yaml 위치는 OS 마다 다르다. 맥/윈도우 양쪽에서 이 설정이 그대로 돌아가도록
+-- 경로를 하드코딩하지 않고 실행 시점에 푼다.
+--   macOS   ~/Library/Arduino15/arduino-cli.yaml
+--   Windows %LOCALAPPDATA%\Arduino15\arduino-cli.yaml
+--   Linux   ~/.arduino15/arduino-cli.yaml
+local function arduino_cli_config()
+	if vim.fn.has("mac") == 1 then
+		return vim.fn.expand("~/Library/Arduino15/arduino-cli.yaml")
+	end
+	if vim.fn.has("win32") == 1 then
+		local appdata = vim.env.LOCALAPPDATA or vim.fn.expand("~/AppData/Local")
+		return appdata .. "\\Arduino15\\arduino-cli.yaml"
+	end
+	return vim.fn.expand("~/.arduino15/arduino-cli.yaml")
+end
+
+-- clangd 는 어느 쪽에서도 PATH 에 없는 경우가 많다. 맥은 brew llvm 이 keg-only 라
+-- 안 잡히고, 윈도우는 LLVM 릴리즈를 그냥 풀어놓은 디렉터리라 안 잡힌다.
+-- PATH -> brew -> 윈도우 LLVM 순으로 찾는다.
+local WIN_CLANGD = "C:/Users/cyon2/clang+llvm-20.1.0-x86_64-pc-windows-msvc/bin/clangd.exe"
+local function clangd_path()
+	if vim.fn.executable("clangd") == 1 then
+		return "clangd"
+	end
+	local brew = "/usr/local/opt/llvm/bin/clangd"
+	if vim.uv.fs_stat(brew) then
+		return brew
+	end
+	if vim.uv.fs_stat(WIN_CLANGD) then
+		return WIN_CLANGD
+	end
+	return "clangd"
+end
+
+-- arduino 쪽 두 실행 파일도 같은 사정이다. 윈도우에서는 손으로 만든 디렉터리에
+-- 놓인 .exe 라 전체 경로로 가리킨다. arduino-language-server 는 scoop 패키지도
+-- npm 패키지도 없는 공식 0.7.7 릴리즈 바이너리다.
+local function arduino_exe(name, win_path)
+	if vim.fn.executable(name) == 1 then
+		return name
+	end
+	return win_path
+end
+
 return {
-	'neovim/nvim-lspconfig',
+	"neovim/nvim-lspconfig",
 	init = function()
+		-- lsp.log는 자동 회전되지 않아 무한정 커진다. 디버깅할 때만 "warn"/"debug"로 올릴 것.
+		vim.lsp.log.set_level("off")
+
 		-- Windows: npm's global bin ships three files per package --
 		-- `pyright-langserver` (a bash shim, no extension), `.cmd` and `.ps1`.
 		-- vim.fn.executable() consults PATHEXT and matches, so the enable gate
@@ -17,72 +64,85 @@ return {
 		local function npm_cmd(exe)
 			local resolved = vim.fn.exepath(exe)
 			if
-				vim.fn.has('win32') == 1
-				and resolved ~= ''
+				vim.fn.has("win32") == 1
+				and resolved ~= ""
 				-- Only the basename matters; parent dirs may contain dots.
-				and not vim.fs.basename(resolved):find('%.')
-				and vim.uv.fs_stat(resolved .. '.cmd')
+				and not vim.fs.basename(resolved):find("%.")
+				and vim.uv.fs_stat(resolved .. ".cmd")
 			then
-				return resolved .. '.cmd'
+				return resolved .. ".cmd"
 			end
 			return exe
 		end
 
-		-- clangd ships as a plain .exe inside an unpacked LLVM release rather
-		-- than on PATH, so executable('clangd') is 0 and the gate below skips
-		-- it. Same path the arduino server's settings already point at.
-		local CLANGD = 'C:/Users/cyon2/clang+llvm-20.1.0-x86_64-pc-windows-msvc/bin/clangd.exe'
+		local CLANGD = clangd_path()
+		local ARDUINO_CLI = arduino_exe("arduino-cli", "C:/Users/cyon2/arduino_cli/bin/arduino-cli.exe")
+		local ARDUINO_LS =
+			arduino_exe("arduino-language-server", "C:/Users/cyon2/arduino_cli/bin/arduino-language-server.exe")
 
-		-- Same situation for the arduino pair: both are loose .exe files in a
-		-- hand-made directory rather than on PATH, so they are referenced in
-		-- full. arduino-language-server has no scoop package and is not on npm
-		-- -- it is the official 0.7.7 release binary, dropped next to the CLI.
-		local ARDUINO_CLI = 'C:/Users/cyon2/arduino_cli/bin/arduino-cli.exe'
-		local ARDUINO_LS = 'C:/Users/cyon2/arduino_cli/bin/arduino-language-server.exe'
-
-		vim.lsp.config('clangd', { cmd = { CLANGD } })
-
-		-- Both are npm installs, so both need the .cmd shim on Windows.
-		vim.lsp.config('ts_ls', {
-			cmd = { npm_cmd('typescript-language-server'), '--stdio' },
+		vim.lsp.config("clangd", {
+			cmd = {
+				CLANGD,
+				"--background-index",
+				"--clang-tidy",
+				"--header-insertion=iwyu",
+				"--completion-style=detailed",
+				"--function-arg-placeholders",
+				"--fallback-style=llvm",
+			},
+			init_options = {
+				usePlaceholders = true,
+				completeUnimported = true,
+				clangdFileStatus = true,
+			},
+			-- 인코딩은 clangd 기본값(utf-8) 그대로 둔다. ruff/pyright와 달리 C/C++ 버퍼에는
+			-- clangd 하나만 붙으므로 서로 열 위치가 어긋날 상대가 없다.
+			-- 굳이 바꿔야 한다면 표준 general.positionEncodings가 아니라 clangd 확장인
+			-- capabilities.offsetEncoding = { "utf-16" } 을 써야 lspconfig 기본값을 덮는다.
 		})
 
-		vim.lsp.config('lua_ls', {
+		-- Both are npm installs, so both need the .cmd shim on Windows.
+		vim.lsp.config("ts_ls", {
+			cmd = { npm_cmd("typescript-language-server"), "--stdio" },
+		})
+
+		vim.lsp.config("lua_ls", {
 			on_init = function(client)
 				if client.workspace_folders then
 					local path = client.workspace_folders[1].name
 					if
-						path ~= vim.fn.stdpath('config')
-						and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc'))
+						path ~= vim.fn.stdpath("config")
+						and (vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc"))
 					then
 						return
 					end
 				end
-				client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+				client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
 					runtime = {
-						version = 'LuaJIT',
+						version = "LuaJIT",
 						path = {
-							'lua/?.lua',
-							'lua/?/init.lua',
+							"lua/?.lua",
+							"lua/?/init.lua",
 						},
 					},
 					workspace = {
 						checkThirdParty = false,
 						library = {
-							vim.env.VIMRUNTIME
-						}
-					}
+							vim.env.VIMRUNTIME,
+						},
+					},
 				})
 			end,
 			settings = {
 				Lua = {
 					runtime = {
-						version = "LuaJIT" },
+						version = "LuaJIT",
+					},
 					diagnostics = {
-						globals = { 'vim' },
-					}
-				}
-			}
+						globals = { "vim" },
+					},
+				},
+			},
 		})
 
 		-- arduino-language-server takes clangd/cli/fqbn as COMMAND-LINE FLAGS,
@@ -90,27 +150,32 @@ return {
 		-- the server never saw them -- it would fall back to looking for
 		-- `clangd` and `arduino-cli` on PATH, neither of which is there.
 		-- `-cli` also wants the executable itself, not the directory.
-		vim.lsp.config('arduino_language_server', {
+		vim.lsp.config("arduino_language_server", {
 			cmd = {
 				ARDUINO_LS,
-				'-cli-config', 'C:/Users/cyon2/AppData/Local/Arduino15/arduino-cli.yaml',
-				'-cli', ARDUINO_CLI,
-				'-clangd', CLANGD,
-				'-fqbn', 'arduino:avr:uno',
+				"-cli-config",
+				arduino_cli_config(),
+				"-cli",
+				ARDUINO_CLI,
+				"-clangd",
+				CLANGD,
+				"-fqbn",
+				"arduino:avr:uno",
 			},
-			filetypes = {"arduino"},
+			filetypes = { "arduino" },
 			-- root_markers matches exact file names; ".yaml" is not a real one.
-			root_markers = {"sketch.yaml", ".git"},
+			root_markers = { "sketch.yaml", ".git" },
 		})
 
-		vim.lsp.config('tailwindcss', {
-			cmd = { npm_cmd('tailwindcss-language-server'), '--stdio' },
+		vim.lsp.config("tailwindcss", {
+			cmd = { npm_cmd("tailwindcss-language-server"), "--stdio" },
 			settings = {
 				tailwindCSS = {
 					experimental = {
 						classRegex = {
-							{ "([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]" }
-						}},
+							{ "([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]" },
+						},
+					},
 					classAttributes = { "class", "className", "class:list", "classList", "ngClass" },
 					includeLanguages = {
 						eelixir = "html-eex",
@@ -118,7 +183,7 @@ return {
 						eruby = "erb",
 						heex = "phoenix-heex",
 						htmlangular = "html",
-						templ = "html"
+						templ = "html",
 					},
 					lint = {
 						cssConflict = "warning",
@@ -127,11 +192,22 @@ return {
 						invalidScreen = "error",
 						invalidTailwindDirective = "error",
 						invalidVariant = "error",
-						recommendedVariantOrder = "warning"
+						recommendedVariantOrder = "warning",
 					},
-					validate = true
-				}
-			}
+					validate = true,
+				},
+			},
+		})
+
+		-- ruff는 기본이 utf-8, pyright는 utf-16이라 같은 버퍼에서 열 위치가 어긋난다.
+		-- 비ASCII 문자가 있는 줄에서 진단/코드액션 위치가 밀리는 것을 막기 위해 utf-16으로 통일.
+		-- hover 는 pyright 쪽에 양보한다(lua/config/lazy.lua 의 LspAttach autocmd).
+		vim.lsp.config("ruff", {
+			capabilities = {
+				general = {
+					positionEncodings = { "utf-16" },
+				},
+			},
 		})
 
 		-- Locate the interpreter pyright should resolve imports against. A
@@ -140,14 +216,14 @@ return {
 		local function venv_python(root)
 			local dirs = {}
 			if root then
-				table.insert(dirs, root .. '/.venv')
-				table.insert(dirs, root .. '/venv')
+				table.insert(dirs, root .. "/.venv")
+				table.insert(dirs, root .. "/venv")
 			end
 			if vim.env.VIRTUAL_ENV then
 				table.insert(dirs, vim.env.VIRTUAL_ENV)
 			end
 
-			local bin = vim.fn.has('win32') == 1 and '/Scripts/python.exe' or '/bin/python'
+			local bin = vim.fn.has("win32") == 1 and "/Scripts/python.exe" or "/bin/python"
 			for _, dir in ipairs(dirs) do
 				local py = dir .. bin
 				if vim.uv.fs_stat(py) then
@@ -156,23 +232,23 @@ return {
 			end
 		end
 
-		vim.lsp.config('pyright', {
+		vim.lsp.config("pyright", {
 			-- Resolved to the .cmd shim on Windows; see npm_cmd above.
-			cmd = { npm_cmd('pyright-langserver'), '--stdio' },
+			cmd = { npm_cmd("pyright-langserver"), "--stdio" },
 			-- vim.lsp.config merges with tbl_deep_extend('force'), which replaces
 			-- arrays wholesale -- so lspconfig's defaults have to be repeated here.
 			-- '.venv'/'venv' are added so a bare script next to a venv still gets a
 			-- workspace root instead of falling back to single-file mode.
 			root_markers = {
-				'pyrightconfig.json',
-				'pyproject.toml',
-				'setup.py',
-				'setup.cfg',
-				'requirements.txt',
-				'Pipfile',
-				'.venv',
-				'venv',
-				'.git',
+				"pyrightconfig.json",
+				"pyproject.toml",
+				"setup.py",
+				"setup.cfg",
+				"requirements.txt",
+				"Pipfile",
+				".venv",
+				"venv",
+				".git",
 			},
 			before_init = function(_, config)
 				local py = venv_python(config.root_dir)
@@ -192,6 +268,8 @@ return {
 		--
 		-- Only enable servers whose executable is actually present, otherwise
 		-- Neovim errors on every matching buffer with "cmd ... is not executable".
+		-- 맥/윈도우 공용으로 쓰려면 이 게이트가 필요하다: 한쪽에만 깔린 서버를
+		-- 무조건 enable 하면 다른 쪽에서 매 버퍼마다 에러가 난다.
 		--
 		-- NOTE: this gate is weaker than it looks on Windows. vim.fn.executable()
 		-- consults PATHEXT and happily matches npm's *extension-less* bash shim
@@ -211,16 +289,19 @@ return {
 		--   published server. Upstream packaging bug (microsoft/vscode#192144).
 		-- Adding it back only spams a spawn/crash error on every .mdx buffer.
 		-- Re-add once a release fixes it; treesitter highlighting is unaffected.
+		--
 		-- jdtls is deliberately ABSENT: nvim-jdtls starts and attaches it from
 		-- ftplugin/java.lua (one server per project root, with its own -data
 		-- workspace), so enabling it here too would start a second client.
+		-- rust_analyzer 도 같은 이유로 없다: rustaceanvim 이 직접 띄운다.
 		local servers = {
-			lua_ls                  = 'lua-language-server',
-			ts_ls                   = 'typescript-language-server',
-			tailwindcss             = 'tailwindcss-language-server',
-			pyright                 = 'pyright-langserver',
-			clangd                  = CLANGD,
-			cmake                   = 'cmake-language-server',
+			lua_ls = "lua-language-server",
+			ts_ls = "typescript-language-server",
+			tailwindcss = "tailwindcss-language-server",
+			pyright = "pyright-langserver",
+			ruff = "ruff",
+			clangd = CLANGD,
+			cmake = "cmake-language-server",
 			arduino_language_server = ARDUINO_LS,
 		}
 
@@ -231,14 +312,14 @@ return {
 		end
 
 		-- :LspWhich -- report which of the configured servers are missing.
-		vim.api.nvim_create_user_command('LspWhich', function()
+		vim.api.nvim_create_user_command("LspWhich", function()
 			local lines = {}
 			for server, exe in pairs(servers) do
 				local found = vim.fn.executable(exe) == 1
-				table.insert(lines, ('%-24s %-32s %s'):format(server, exe, found and 'ok' or 'MISSING'))
+				table.insert(lines, ("%-24s %-32s %s"):format(server, exe, found and "ok" or "MISSING"))
 			end
 			table.sort(lines)
-			vim.notify(table.concat(lines, '\n'))
-		end, { desc = 'Show which configured LSP servers are installed' })
+			vim.notify(table.concat(lines, "\n"))
+		end, { desc = "Show which configured LSP servers are installed" })
 	end,
 }

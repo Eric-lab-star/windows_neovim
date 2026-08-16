@@ -10,7 +10,7 @@ return {
 			'markdown',
 			'markdown_inline',
 			'rust',
-			'javascript', 'cpp', 'cmake', 'json', 'java', 'lua',
+			'javascript', 'c', 'cpp', 'cmake', 'json', 'java', 'lua', 'go', 'xml',
 			-- These back filetypes the config already targets (ts_ls, tailwind,
 			-- pyright, lazydev) but had no parser, so treesitter.start() was a
 			-- no-op there: no highlighting, no context-commentstring.
@@ -22,7 +22,3 @@ return {
 		}
 	end,
 }
-
-
-
-
