@@ -1,3 +1,3 @@
 return {
-	'https://github.com/godlygeek/tabular',
+	url =	'https://github.com/godlygeek/tabular',
 }
