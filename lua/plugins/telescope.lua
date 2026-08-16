@@ -1,10 +1,9 @@
 return {
 	"nvim-telescope/telescope.nvim",
-	tag = "0.1.8",
+	branch = "master",
 
 	dependencies = {
 		"nvim-lua/plenary.nvim",
-		"benfowler/telescope-luasnip.nvim",
 		"nvim-telescope/telescope-project.nvim",
 	},
 
@@ -13,49 +12,8 @@ return {
 		local telescope = require("telescope")
 		local actions = require("telescope.actions")
 
-		-- Clone the default Telescope configuration
-		local vimgrep_arguments = {
-				"rg",
-
-				"--color=never",
-
-				"--no-heading",
-				"--with-filename",
-				"--line-number",
-				"--column",
-				"--smart-case"
-			}
-
-		local additional_args = {
-			"--hidden", -- Search in hidden/dot files
-			"--glob",
-			"!**/.git/*", -- Exclude `.git` directory
-			"--glob",
-			"!**/node_modules/*", -- Exclude `node_modules` directory
-			"--glob",
-			"!**/build/*", -- Exclude `build` directory
-			"--glob",
-			"!Flutter/**/ios/*", -- Exclude Flutter iOS directory
-			"--glob",
-			"!**/*.png", -- Exclude PNG files
-			"--glob",
-			"!**/.gradle/**", -- Exclude `.gradle` directory
-			"--glob",
-			"!**/.ccls-cache/**", -- Exclude `.ccls-cache` directory
-			"--glob",
-			"!**/target/**", -- Exclude `target` directory
-		}
-
-
-		for _, arg in ipairs(additional_args) do
-				table.insert(vimgrep_arguments, arg)
-		end
 
 		telescope.setup({
-			defaults = {
-				-- `hidden = true` is not supported in text grep commands.
-				vimgrep_arguments = vimgrep_arguments,
-			},
 			pickers = {
 				buffers = {
 					mappings = {
@@ -64,91 +22,17 @@ return {
 						},
 					},
 				},
-				find_files = {
-					-- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
-					find_command ={
-							"rg",
-							"--files",
-							"--hidden",
-							"--glob",
-							"!**/node_modules/*",
-							"--glob",
-							"!**/.git/*",
-							"--glob",
-							"!**/ios/*",
-							"--glob",
-							"!**/build/*",
-							"--glob",
-							"!**/android/*",
-							"--glob",
-							"!**/macos/*",
-							"--glob",
-							"!**/web/*",
-							"--glob",
-							"!**/windows/*",
-							"--glob",
-							"!**/linux/*",
-							"--glob",
-							"!**/.dart_tool/*",
-							"--glob",
-							"!**/*.png",
-							"--glob",
-							"!**/.gradle/**",
-							"--glob",
-							"!**/.ccls-cache/**",
-							"--glob",
-							"!**/target/**",
-						},
-				},
-				oldfiles = {},
-				live_grep = {
-					find_files = {
-						find_command = {
-							"rg",
-							"--files",
-							"--hidden",
-							"--glob",
-							"!**/node_modules/*",
-							"--glob",
-							"!**/.git/*",
-							"--glob",
-							"!**/ios/*",
-							"--glob",
-							"!**/build/*",
-							"--glob",
-							"!**/android/*",
-							"--glob",
-							"!**/macos/*",
-							"--glob",
-							"!**/web/*",
-							"--glob",
-							"!**/windows/*",
-							"--glob",
-							"!**/linux/*",
-							"--glob",
-							"!**/.dart_tool/*",
-							"--glob",
-							"!**/*.png",
-							"--glob",
-							"!**/.gradle/**",
-							"--glob",
-							"!**/.ccls-cache/**",
-							"--glob",
-							"!**/target/**",
-						},
-					},
-				},
 			},
 			extensions = {
 				project = {
+					-- ~ 로 시작하는 상대 경로라 맥/윈도우 양쪽에서 홈 기준으로 풀린다.
 					base_dirs = {
-						'~/Documents/doodle/',
+						'~/Programming/',
 					},
 				},
 			}
 		})
 
-		require("telescope").load_extension("luasnip")
 		require("telescope").load_extension("project")
 
 		local keys = vim.keymap
@@ -162,7 +46,6 @@ return {
 		keys.set("n", "<leader>ic", builtin.lsp_incoming_calls, { noremap = true })
 		keys.set("n", "<leader>wd", builtin.diagnostics, { noremap = true })
 		keys.set("n", "<leader>lg", builtin.live_grep, { noremap = true })
-		keys.set("n", "<leader>nn", "<cmd>Telescope luasnip<cr>")
-		-- keys.set("n", "<leader>pp", "<cmd>Telescope projects<cr>")
+		keys.set("n", "<leader>pp", "<cmd>Telescope project<cr>")
 	end,
 }
