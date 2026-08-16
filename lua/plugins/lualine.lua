@@ -1,5 +1,8 @@
 return {
 	'nvim-lualine/lualine.nvim',
+	-- statusline 은 첫 화면이 그려진 뒤에 붙어도 눈에 띄지 않는다. 이 한 줄로
+	-- lsp-progress.nvim 까지 같이 뒤로 밀린다.
+	event = "VeryLazy",
 	dependencies = {
 		'nvim-tree/nvim-web-devicons',
 		'linrongbin16/lsp-progress.nvim',

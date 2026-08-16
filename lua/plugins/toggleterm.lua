@@ -1,6 +1,18 @@
 return {
 	'akinsho/toggleterm.nvim',
 	version = "*",
+
+	-- 실제 매핑은 아래 config 에서 만든다. 여기 있는 건 lazy.nvim 이 대신 걸어두는
+	-- 스텁이라, 누르면 플러그인을 로드한 뒤 진짜 매핑으로 키를 다시 흘려보낸다.
+	-- 그래서 lhs 만 적으면 되고 config 쪽은 건드릴 필요가 없다.
+	keys = {
+		{ "<C-s>", mode = { "n", "t" }, desc = "Toggle terminal" },
+		{ "<F2>", desc = "Compile (arduino/cpp)" },
+		{ "<F3>", desc = "Upload (arduino)" },
+		{ "<F4>", desc = "Serial monitor (arduino)" },
+	},
+	cmd = { "ToggleTerm", "TermExec" },
+
 	config = function ()
 		require("toggleterm").setup({
 			size = function(term)

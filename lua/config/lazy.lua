@@ -31,8 +31,12 @@ vim.opt.cmdheight = 0
 vim.g.mapleader = "\\"
 vim.g.maplocalleader = "\\"
 
+-- virtual_text 는 계속 끈다(줄 끝에 붙어서 잘리니까). 대신 0.11+ 의 virtual_lines
+-- 로 커서가 놓인 줄에만 진단 전문을 아래에 펼친다. 예전에는 virtual_text=false
+-- 하나뿐이라 Trouble 을 열기 전에는 메시지를 볼 방법이 아예 없었다.
 vim.diagnostic.config({
 	virtual_text = false,
+	virtual_lines = { current_line = true },
 })
 
 vim.o.winborder='single'
@@ -195,9 +199,41 @@ vim.keymap.set(
 
 
 -- tree-sitter
+--
+-- main 브랜치는 master 와 달리 highlight 외에는 아무것도 자동으로 붙여주지
+-- 않는다. vim.treesitter.start() 가 highlight 만 켜므로 indent 와 fold 는 여기서
+-- 직접 건다.
+--
+-- 쿼리가 있는 언어에만 건다. indents/folds 쿼리가 없는 파서에 indentexpr 를
+-- 걸어버리면 built-in indent(예: lua, python) 를 빼앗아놓고 아무것도 못 해서
+-- 들여쓰기가 오히려 나빠진다.
 vim.api.nvim_create_autocmd('FileType', {
-  callback = function() pcall(vim.treesitter.start) end,
+  callback = function(args)
+    if not pcall(vim.treesitter.start) then
+      return
+    end
+
+    local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+    if not lang then
+      return
+    end
+
+    if vim.treesitter.query.get(lang, 'indents') then
+      vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    end
+
+    if vim.treesitter.query.get(lang, 'folds') then
+      -- wo[0][0] = 현재 창이되 이 버퍼에서만. 그냥 wo 로 걸면 나중에 그 창에
+      -- 다른 파일을 띄웠을 때 foldexpr 가 따라다닌다.
+      vim.wo[0][0].foldmethod = 'expr'
+      vim.wo[0][0].foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+    end
+  end,
 })
+
+-- foldmethod=expr 는 기본 foldlevel 이 0 이라 파일을 열자마자 전부 접힌다.
+-- 99 로 두면 접기는 쓸 수 있되(zc/za/zR) 열 때는 항상 펼쳐진 상태다.
+vim.opt.foldlevelstart = 99
 
 -- Setup lazy.nvim
 --

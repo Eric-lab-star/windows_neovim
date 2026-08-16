@@ -2,17 +2,50 @@ return {
 	"nvim-telescope/telescope.nvim",
 	branch = "master",
 
+	-- 예전에는 트리거가 없어서 시작할 때 통째로 로드됐고, dependencies 를 통해
+	-- plenary / telescope-project / nvim-treesitter 까지 같이 끌려왔다.
+	cmd = "Telescope",
+
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope-project.nvim",
-		{"nvim-treesitter/nvim-treesitter", branch = "main"}
+		{ "nvim-treesitter/nvim-treesitter", branch = "main" },
+	},
+
+	-- 키맵은 config 가 아니라 여기 있어야 한다. config 안에 두면 그걸 등록하려고
+	-- 플러그인을 먼저 로드해야 해서 lazy 로딩이 성립하지 않는다.
+	--
+	-- 각 함수 안에서 require 하는 것도 같은 이유다. 스펙 최상단에서
+	-- require("telescope.builtin") 을 해버리면 스펙을 읽는 시점 = 시작 시점에
+	-- telescope 가 로드된다.
+	keys = {
+		{
+			"<leader>.",
+			function()
+				require("telescope.builtin").find_files({ cwd = vim.fn.expand("%:p:h") })
+			end,
+			desc = "Find files (current file's dir)",
+		},
+		{ "<leader>ff", function() require("telescope.builtin").find_files() end, desc = "Find files" },
+		{ "<leader>fb", function() require("telescope.builtin").buffers() end, desc = "Buffers" },
+		{ "<leader>fg", function() require("telescope.builtin").live_grep() end, desc = "Live grep" },
+		{ "<leader>lg", function() require("telescope.builtin").live_grep() end, desc = "Live grep" },
+		{
+			"<leader>fs",
+			function() require("telescope.builtin").current_buffer_fuzzy_find() end,
+			desc = "Search in current buffer",
+		},
+		{ "<leader>ma", function() require("telescope.builtin").marks() end, desc = "Marks" },
+		{ "<leader>rr", function() require("telescope.builtin").registers() end, desc = "Registers" },
+		{ "<leader>oc", function() require("telescope.builtin").lsp_outgoing_calls() end, desc = "LSP outgoing calls" },
+		{ "<leader>ic", function() require("telescope.builtin").lsp_incoming_calls() end, desc = "LSP incoming calls" },
+		{ "<leader>wd", function() require("telescope.builtin").diagnostics() end, desc = "Diagnostics" },
+		{ "<leader>pp", "<cmd>Telescope project<cr>", desc = "Projects" },
 	},
 
 	config = function()
-		local builtin = require("telescope.builtin")
 		local telescope = require("telescope")
 		local actions = require("telescope.actions")
-
 
 		telescope.setup({
 			defaults = {},
@@ -40,20 +73,6 @@ return {
 			}
 		})
 
-		require("telescope").load_extension("project")
-
-			local keys = vim.keymap
-		keys.set('n', '<leader>.', function() builtin.find_files({ cwd = vim.fn.expand('%:p:h') }) end)
-		keys.set("n", "<leader>ff", builtin.find_files, {})
-		keys.set("n", "<leader>fb", builtin.buffers, {})
-		keys.set("n", "<leader>fg", builtin.live_grep, {})
-		keys.set("n", "<leader>fs", builtin.current_buffer_fuzzy_find, {}) -- search in current buffer
-		keys.set("n", "<leader>ma", builtin.marks, {}) -- list marks
-		keys.set("n", "<leader>rr", builtin.registers, {}) -- list registers 
-		keys.set("n", "<leader>oc", builtin.lsp_outgoing_calls, { noremap = true })
-		keys.set("n", "<leader>ic", builtin.lsp_incoming_calls, { noremap = true })
-		keys.set("n", "<leader>wd", builtin.diagnostics, { noremap = true })
-		keys.set("n", "<leader>lg", builtin.live_grep, { noremap = true })
-		keys.set("n", "<leader>pp", "<cmd>Telescope project<cr>")
+		telescope.load_extension("project")
 	end,
 }

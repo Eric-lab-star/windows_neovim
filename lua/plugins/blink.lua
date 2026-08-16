@@ -1,8 +1,13 @@
 return {
   'saghen/blink.cmp',
+  -- lazydev 는 여기서 뺐다. dependencies 에 있으면 blink 가 eager 라서 같이
+  -- 끌려오는데, 아래 providers.lazydev 가 module 로 지연 참조하고 lazydev 자신도
+  -- ft = "lua" 를 갖고 있어서 필요한 순간에 알아서 로드된다.
+  --
+  -- LuaSnip 은 남긴다. snippets.preset = 'luasnip' 이 filetype 을 가리지 않고
+  -- 쓰이므로 여기서 빼봐야 어차피 첫 완성에서 바로 로드된다.
   dependencies = {
 		'rafamadriz/friendly-snippets',
-		'folke/lazydev.nvim',
 		'L3MON4D3/LuaSnip',
 	},
 
